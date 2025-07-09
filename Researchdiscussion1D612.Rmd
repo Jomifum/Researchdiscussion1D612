@@ -1,0 +1,115 @@
+---
+title: "Research Discussion 1 D612"
+author: "Jose Fuentes"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+Please complete the research discussion assignment in a Jupyter or R Markdown notebook. You should post the GitHub link to your research in a new discussion thread.
+
+Now that we have covered basic techniques for recommender systems, choose one commercial recommender and describe how you think it works (content-based, collaborative filtering, etc). Does the technique deliver a good experience or are the recommendations off-target?
+
+## Commercial Recommender
+
+As a commercial recommender system I choosed Netflix. Based on published information and technical papers, Netflix uses a hybrid recommendation system that incorporates methods such as:
+
+Collaborative Filtering (e.g., matrix factorization techniques like SVD)
+
+Content-Based Filtering (e.g., genre, director, cast, others.)
+
+Contextual information (e.g., time of day, user device, watch history)
+
+These methods combined together use ensemble learning to personalize future recommendations.
+
+# Experience
+Netflix generally delivers a good recommendation experience. For example, after watching multiple documentaries, the homepage adapts to prioritize that genre. However, occasional off-target recommendations can appear, especially if a user shares their account or tries something outside their usual viewing habits.
+
+You may also choose one of the three non-personalized recommenders (below) we went over in class and describe the technique and which of the three you prefer to use.
+
+1. Metacritic:  How We Create the Metascore Magic
+2. Rotten Tomatoes: About Rotten Tomatoes
+3. IMDB:  FAQ for IMDb Ratings
+
+## Non-personalized recommenders: Metacritic
+
+Metacritic uses a non-personalized ranking-based recommendation system. Description how it works below:
+
+It aggregates reviews from professional critics and assigns a weighted average score (the Metascore). Then these weights are assigned based on the perceived quality and stature of the critic or publication, and  after users can see a simple numerical score, which serves as a quick indicator of consensus.
+
+# Method: 
+Metacritic uses expert-based filtering, where critics' ratings are combined without personalization to recommend media. This is essentially a non-personalized recommender.
+
+Below an example of how Metacritics work: 
+
+This R code simulates critic scores from various outlets, each with different scoring scales and assigned weights.
+It defines a function to normalize all raw scores to a consistent 0-100 scale, handling numeric and letter grades.
+
+The normalization function is then applied to each critic's raw score based on its specified scale.
+Finally, the code calculates a weighted Metascore by summing the product of normalized scores and their weights, then dividing by the total weight.
+
+The script then outputs the updated critic scores data frame, which now includes the normalized scores, and the final calculated weighted Metascore simulation.
+
+```{r}
+# Simulate a small batch of critic scores and weights
+critic_scores <- data.frame(
+  outlet = c("Outlet A","Outlet B","Outlet C","Outlet D"),
+  raw_score = c(4.5, "B+", 78, 3.8),
+  scale     = c("0-5","A-F","0-100","0-5"),
+  weight    = c(1.2, 1.0, 1.5, 0.8),
+  stringsAsFactors = FALSE
+)
+
+# Function to normalize to 0-100
+normalize_score <- function(score, scale) {
+  if (scale == "0-5")       return(as.numeric(score) / 5 * 100)
+  if (scale == "A-F") {
+    grades <- c("A+"=100,"A"=95,"A-"=90,"B+"=85,"B"=80,"B-"=75,"C+"=70,
+                "C"=65,"C-"=60,"D"=50,"F"=0)
+    return(grades[score])
+  }
+  if (scale == "0-100")     return(as.numeric(score))
+  NA
+}
+
+# Apply normalization
+critic_scores$norm_score <- mapply(normalize_score,
+                                   critic_scores$raw_score,
+                                   critic_scores$scale)
+
+# Compute weighted Metascore
+weighted_sum <- sum(critic_scores$norm_score * critic_scores$weight)
+total_weight <- sum(critic_scores$weight)
+metascore_sim <- weighted_sum / total_weight
+
+critic_scores
+metascore_sim
+```
+
+# Attacks on Recommender System
+
+# Read the article below and consider how to handle attacks on recommender systems. Can you think of a similar example where a collective effort to alter the workings of content recommendations have been successful? How would you design a system to prevent this kind of abuse?
+
+Travis M. Andrews, The Washington Post (2017): Wisdom of the crowd? IMDb users gang up on Christian Bale’s new movie before it even opens
+
+The film "The Promise" faced a significant challenge on IMDb when a coordinated effort by Turkish internet trolls manipulated its rating system with an influx of one-star reviews before its official release. This "review bombing" was politically motivated, stemming from the denial of the Armenian genocide, which the film depicts. This incident highlights how collective user actions can distort content recommendation systems, making it difficult for audiences to gauge a product's true quality.
+
+A similar, though less malicious, example of collective influence on recommendations can be observed in online fan communities. Dedicated fanbases can significantly boost the visibility of niche content on platforms like YouTube or Spotify through concentrated positive engagement. By repeatedly liking, sharing, and consuming content, these groups can push their favored creators into trending lists and influence "similar to" recommendations, effectively shaping what new users are exposed to. While their aim is promotion rather than demotion, both scenarios underscore the power of collective user behavior to alter algorithmic outputs.
+
+How to Prevent Such Abuse the following can be implemented:
+
+Time-Gating Reviews: Only allow ratings after confirmed interaction (e.g., verified purchase, or ticket confirmation).
+
+Weighting by Behavior: Use machine learning to detect anomalous rating patterns and reduce their influence.
+
+Trust-Based Modeling: Assign credibility scores to users based on historical activity and diversity of interactions.
+
+Hybrid Models: Combine user-generated data with curated reviews from verified critics (like Metacritic).
+
+Anomaly Detection Algorithms: Automatically flag sudden influxes of ratings or highly polarized scores for moderation.
+
+
